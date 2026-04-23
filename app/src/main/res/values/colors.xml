@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimary">#2196F3</color> <!-- Un azul material -->
+    <color name="colorAccent">#FFC107</color> <!-- Un amarillo/ámbar para resaltar -->
+    <color name="colorFondo">#F5F5F5</color> <!-- Un gris muy claro para el fondo -->
+    <color name="colorTextoSecundario">#757575</color>
+</resources>
