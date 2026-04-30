@@ -13,10 +13,18 @@ import android.widget.Toast;
 import android.widget.Button;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private EditText etCodigo, etDescripcion, etPrecio;
-    private Button btnRegistrar, btnBorrar, btnEditar, btnBuscar;
+    private Button btnRegistrar, btnBorrar, btnEditar, btnBuscar, btnVerTodos;
+
+    private RecyclerView rvArticulos;
+    private ArticuloAdapter adaptador;
+    private List<Articulo> listaArticulos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -27,10 +35,13 @@ public class MainActivity extends AppCompatActivity {
         etDescripcion = findViewById(R.id.etDescripcion);
         etPrecio = findViewById(R.id.etPrecio);
 
+        rvArticulos = findViewById(R.id.rvArticulos);
+
         btnRegistrar = findViewById(R.id.btnRegistrar);
         btnBuscar = findViewById(R.id.btnBuscar);
         btnEditar = findViewById(R.id.btnEditar);
         btnBorrar = findViewById(R.id.btnBorrar);
+        btnVerTodos = findViewById(R.id.btnVerTodos);
 
         btnRegistrar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,6 +70,13 @@ public class MainActivity extends AppCompatActivity {
                 borrarArticulo();
             }
         });
+
+        btnVerTodos.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { cargarListaArticulos(); }
+        });
+
+        rvArticulos.setLayoutManager(new LinearLayoutManager(this));
 
     }
 
@@ -174,5 +192,29 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Debes llenar todos los campos", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void cargarListaArticulos(){
+        listaArticulos = new ArrayList<>();
+
+        AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(this, "administracion.db", null, 1);
+        SQLiteDatabase bd = admin.getReadableDatabase();
+
+        android.database.Cursor fila = bd.rawQuery("SELECT codigo, descripcion, precio FROM articulos", null);
+
+        while (fila.moveToNext()){
+            int codigo = fila.getInt(0);
+            String descripcion = fila.getString(1);
+            double precio = fila.getDouble(2);
+
+            listaArticulos.add(new Articulo(codigo, descripcion, precio));
+        }
+
+        bd.close();
+        fila.close();
+
+        adaptador = new ArticuloAdapter(listaArticulos);
+
+        rvArticulos.setAdapter(adaptador);
     }
 }
