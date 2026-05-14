@@ -28,7 +28,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvArticulos;
     private ArticuloAdapter adaptador;
     private List<Articulo> listaArticulos;
-
     private FirebaseFirestore db;
     private android.widget.ProgressBar pbCarga;
     private com.google.android.material.switchmaterial.SwitchMaterial swOferta;
