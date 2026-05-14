@@ -17,6 +17,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private EditText etCodigo, etDescripcion, etPrecio;
@@ -25,6 +28,10 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvArticulos;
     private ArticuloAdapter adaptador;
     private List<Articulo> listaArticulos;
+
+    private FirebaseFirestore db;
+    private android.widget.ProgressBar pbCarga;
+    private com.google.android.material.switchmaterial.SwitchMaterial swOferta;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -41,12 +48,16 @@ public class MainActivity extends AppCompatActivity {
         btnBuscar = findViewById(R.id.btnBuscar);
         btnEditar = findViewById(R.id.btnEditar);
         btnBorrar = findViewById(R.id.btnBorrar);
-        btnVerTodos = findViewById(R.id.btnVerTodos);
+
+        pbCarga = findViewById(R.id.pbCarga);
+        swOferta = findViewById(R.id.swOferta);
+        //btnVerTodos = findViewById(R.id.btnVerTodos);
+        db = FirebaseFirestore.getInstance();
 
         btnRegistrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                registrarArticulo();
+                registrarArticuloFirebase();
             }
         });
 
@@ -71,10 +82,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btnVerTodos.setOnClickListener(new View.OnClickListener() {
+        /*btnVerTodos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) { cargarListaArticulos(); }
-        });
+        });*/
 
         rvArticulos.setLayoutManager(new LinearLayoutManager(this));
 
@@ -97,6 +108,12 @@ public class MainActivity extends AppCompatActivity {
 
             //INSERT INTO articulos (codigo, descripcion, precio) VALUES (123423, "Teclado", 230000.00);
             baseDeDatos.insert("articulos", null, registro);
+
+            cargarListaArticulos();
+
+            if (adaptador != null){
+                adaptador.notifyDataSetChanged();
+            }
 
             //Cerrar conexion a la base de datos
             baseDeDatos.close();
@@ -216,5 +233,44 @@ public class MainActivity extends AppCompatActivity {
         adaptador = new ArticuloAdapter(listaArticulos);
 
         rvArticulos.setAdapter(adaptador);
+    }
+
+    private void registrarArticuloFirebase(){
+        String codigo = etCodigo.getText().toString();
+        String descripcion = etDescripcion.getText().toString();
+        String precio = etPrecio.getText().toString();
+
+        boolean estaEnOferta = swOferta.isChecked();
+
+        if (!codigo.isEmpty() && !descripcion.isEmpty() && !precio.isEmpty()){
+
+            pbCarga.setVisibility(View.VISIBLE);
+            btnRegistrar.setEnabled(false);
+
+            Map<String, Object> articuloMap = new HashMap<>();
+            articuloMap.put("codigo", Integer.parseInt(codigo));
+            articuloMap.put("descripcion", descripcion);
+            articuloMap.put("precio", Double.parseDouble(precio));
+            articuloMap.put("oferta", estaEnOferta);
+
+            db.collection("articulos").document(codigo)
+                    .set(articuloMap)
+                    .addOnSuccessListener(aVoid -> {
+                        pbCarga.setVisibility(View.GONE);
+                        btnRegistrar.setEnabled(true);
+                        Toast.makeText(MainActivity.this, "Guardado en la NUBE", Toast.LENGTH_SHORT).show();
+                        etCodigo.setText("");
+                        etDescripcion.setText("");
+                        etPrecio.setText("");
+                        swOferta.setChecked(false);
+                    })
+                    .addOnFailureListener(e -> {
+                        pbCarga.setVisibility(View.GONE);
+                        btnRegistrar.setEnabled(true);
+                        Toast.makeText(MainActivity.this, "Error al guardar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        } else {
+            Toast.makeText(this, "Llena todos los campos del formulario", Toast.LENGTH_SHORT).show();
+        }
     }
 }

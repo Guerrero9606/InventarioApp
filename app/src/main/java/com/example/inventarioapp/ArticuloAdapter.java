@@ -4,7 +4,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
@@ -30,6 +33,21 @@ public class ArticuloAdapter extends RecyclerView.Adapter<ArticuloAdapter.Articu
         holder.tvCodigo.setText(String.valueOf(articuloActual.getCodigo()));
         holder.tvDescripcion.setText(articuloActual.getDescripcion());
         holder.tvPrecio.setText("$ " + articuloActual.getPrecio());
+
+        if(articuloActual.getPrecio() >= 100000){
+            holder.tvEstado.setText("PREMIUM");
+            holder.tvEstado.setBackgroundColor(android.graphics.Color.parseColor("#FFC107"));
+        } else {
+            holder.tvEstado.setText("ESTANDAR");
+            holder.tvEstado.setBackgroundColor(android.graphics.Color.parseColor("#4CAF50"));
+        }
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(v.getContext(), "Seleccionaste: " + articuloActual.getDescripcion(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -38,13 +56,16 @@ public class ArticuloAdapter extends RecyclerView.Adapter<ArticuloAdapter.Articu
     }
 
     public static class ArticuloViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCodigo, tvDescripcion, tvPrecio;
+        TextView tvCodigo, tvDescripcion, tvPrecio, tvEstado;
+        CardView cvContenedor;
 
         public ArticuloViewHolder(@NonNull View itemView) {
             super(itemView);
             tvCodigo = itemView.findViewById(R.id.tvItemCodigo);
             tvDescripcion = itemView.findViewById(R.id.tvItemDescripcion);
             tvPrecio = itemView.findViewById(R.id.tvItemPrecio);
+            tvEstado = itemView.findViewById(R.id.tvItemEstado);
+            cvContenedor = itemView.findViewById(R.id.cvContenedor);
         }
     }
 }
