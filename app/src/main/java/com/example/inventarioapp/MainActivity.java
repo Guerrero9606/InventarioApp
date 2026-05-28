@@ -18,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         pbCarga = findViewById(R.id.pbCarga);
         swOferta = findViewById(R.id.swOferta);
-        //btnVerTodos = findViewById(R.id.btnVerTodos);
+        btnVerTodos = findViewById(R.id.btnVerTodos);
         db = FirebaseFirestore.getInstance();
 
         btnRegistrar.setOnClickListener(new View.OnClickListener() {
@@ -63,30 +65,32 @@ public class MainActivity extends AppCompatActivity {
         btnBuscar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                buscarArticulo();
+                buscarArticuloFirebase();
             }
         });
 
         btnEditar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                modificarArticulo();
+                modificarArticuloFirebase();
             }
         });
 
         btnBorrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                borrarArticulo();
+                borrarArticuloFirebase();
             }
         });
 
-        /*btnVerTodos.setOnClickListener(new View.OnClickListener() {
+        btnVerTodos.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { cargarListaArticulos(); }
-        });*/
+            public void onClick(View v) { filtrarSoloOfertas(); }
+        });
 
         rvArticulos.setLayoutManager(new LinearLayoutManager(this));
+
+        cargarDatosEnTiempoReal();
 
     }
 
@@ -153,6 +157,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void buscarArticuloFirebase(){
+        String codigo = etCodigo.getText().toString();
+
+        if(codigo.isEmpty()){
+            Toast.makeText(this, "Ingrese el codigo a buscar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("articulos").document(codigo).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if(documentSnapshot.exists()){
+                        String descripcion = documentSnapshot.getString("descripcion");
+                        Double precio = documentSnapshot.getDouble("precio");
+                        Boolean oferta = documentSnapshot.getBoolean("oferta");
+
+                        etDescripcion.setText(descripcion);
+                        etPrecio.setText(String.valueOf(precio));
+
+                        if (oferta != null){
+                            swOferta.setChecked(oferta);
+                        } else {
+                            swOferta.setChecked(false);
+                        }
+
+                        Toast.makeText(this, "Articulo encontrado", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "El articulo no existe", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                   Toast.makeText(this, "Error de conexion", Toast.LENGTH_SHORT).show();
+                });
+    }
+
     private void borrarArticulo(){
         String codigo = etCodigo.getText().toString();
 
@@ -176,6 +214,27 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Ingrese el codigo del articulo a eliminar", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void borrarArticuloFirebase(){
+        String codigo = etCodigo.getText().toString();
+
+        if (codigo.isEmpty()){
+            Toast.makeText(this, "Ingrese el codigo del articulo a eliminar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("articulos").document(codigo).delete()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Articulo eliminado", Toast.LENGTH_SHORT).show();
+                    etCodigo.setText("");
+                    etDescripcion.setText("");
+                    etPrecio.setText("");
+                    swOferta.setChecked(false);
+                })
+                .addOnFailureListener(e -> {
+                   Toast.makeText(this, "Error al borrar", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void modificarArticulo(){
@@ -210,28 +269,102 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void modificarArticuloFirebase(){
+        String codigo = etCodigo.getText().toString();
+        String descripcion = etDescripcion.getText().toString();
+        String precio = etPrecio.getText().toString();
+        boolean oferta = swOferta.isChecked();
+
+        if (!codigo.isEmpty() && !descripcion.isEmpty() && !precio.isEmpty()){
+            db.collection("articulos").document(codigo)
+                    .update(
+                            "descripcion", descripcion,
+                            "precio", Double.parseDouble(precio),
+                            "oferta", oferta
+                    )
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Articulo actualizado", Toast.LENGTH_SHORT).show();
+                        etCodigo.setText("");
+                        etDescripcion.setText("");
+                        etPrecio.setText("");
+                        swOferta.setChecked(false);
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Error al actualizar", Toast.LENGTH_SHORT).show();
+                    });
+        } else {
+            Toast.makeText(this, "Llena todos los campos para editar", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void cargarListaArticulos(){
+        //SQLite
+        //listaArticulos = new ArrayList<>();
+
+        //AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(this, "administracion.db", null, 1);
+        //SQLiteDatabase bd = admin.getReadableDatabase();
+
+        //android.database.Cursor fila = bd.rawQuery("SELECT codigo, descripcion, precio FROM articulos", null);
+
+        //while (fila.moveToNext()){
+        //    int codigo = fila.getInt(0);
+        //    String descripcion = fila.getString(1);
+        //    double precio = fila.getDouble(2);
+
+        //    listaArticulos.add(new Articulo(codigo, descripcion, precio));
+        //}
+
+        //bd.close();
+        //fila.close();
+
+        //adaptador = new ArticuloAdapter(listaArticulos);
+
+        //rvArticulos.setAdapter(adaptador);
+
+        //Firebase
         listaArticulos = new ArrayList<>();
 
-        AdminSQLiteOpenHelper admin = new AdminSQLiteOpenHelper(this, "administracion.db", null, 1);
-        SQLiteDatabase bd = admin.getReadableDatabase();
+        db.collection("articulos")
+                .get()
+                .addOnCompleteListener( task -> {
+                    if (task.isSuccessful()){
+                        listaArticulos.clear();
 
-        android.database.Cursor fila = bd.rawQuery("SELECT codigo, descripcion, precio FROM articulos", null);
+                        for (QueryDocumentSnapshot documento : task.getResult()){
+                            Articulo articulo = documento.toObject(Articulo.class);
+                            listaArticulos.add(articulo);
+                        }
 
-        while (fila.moveToNext()){
-            int codigo = fila.getInt(0);
-            String descripcion = fila.getString(1);
-            double precio = fila.getDouble(2);
+                        adaptador = new ArticuloAdapter(listaArticulos);
+                        rvArticulos.setAdapter(adaptador);
+                    } else {
+                        Toast.makeText(this, "Error al cargar los datos", Toast.LENGTH_SHORT).show();
+                    }
+                } );
+    }
 
-            listaArticulos.add(new Articulo(codigo, descripcion, precio));
-        }
-
-        bd.close();
-        fila.close();
-
+    private void cargarDatosEnTiempoReal(){
+        listaArticulos = new ArrayList<>();
         adaptador = new ArticuloAdapter(listaArticulos);
-
         rvArticulos.setAdapter(adaptador);
+
+        db.collection("articulos")
+                .addSnapshotListener( (value, error) -> {
+                    if(error != null){
+                        Toast.makeText(this, "Fallo al escuchar los cambios", Toast.LENGTH_SHORT).show();
+                    }
+
+                    if (value != null){
+                        listaArticulos.clear();
+
+                        for (QueryDocumentSnapshot documento : value){
+                            Articulo articulo = documento.toObject(Articulo.class);
+                            listaArticulos.add(articulo);
+                        }
+
+                        adaptador.notifyDataSetChanged();
+                    }
+                } );
     }
 
     private void registrarArticuloFirebase(){
@@ -271,5 +404,26 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Llena todos los campos del formulario", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void filtrarSoloOfertas() {
+        db.collection("articulos")
+                .whereEqualTo("oferta", true)
+                .whereGreaterThan("precio", 100000)
+                .addSnapshotListener( (value, error) -> {
+                    if (error != null){
+                        return;
+                    }
+
+                    if (value != null){
+                        listaArticulos.clear();
+
+                        for (QueryDocumentSnapshot documento: value){
+                            listaArticulos.add(documento.toObject(Articulo.class));
+                        }
+
+                        adaptador.notifyDataSetChanged();
+                    }
+                } );
     }
 }

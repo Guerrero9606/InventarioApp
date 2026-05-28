@@ -33,6 +33,7 @@ public class ArticuloAdapter extends RecyclerView.Adapter<ArticuloAdapter.Articu
         holder.tvCodigo.setText(String.valueOf(articuloActual.getCodigo()));
         holder.tvDescripcion.setText(articuloActual.getDescripcion());
         holder.tvPrecio.setText("$ " + articuloActual.getPrecio());
+        holder.tvOferta.setEnabled(articuloActual.isOferta());
 
         if(articuloActual.getPrecio() >= 100000){
             holder.tvEstado.setText("PREMIUM");
@@ -56,7 +57,7 @@ public class ArticuloAdapter extends RecyclerView.Adapter<ArticuloAdapter.Articu
     }
 
     public static class ArticuloViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCodigo, tvDescripcion, tvPrecio, tvEstado;
+        TextView tvCodigo, tvDescripcion, tvPrecio, tvEstado, tvOferta;
         CardView cvContenedor;
 
         public ArticuloViewHolder(@NonNull View itemView) {
@@ -66,6 +67,7 @@ public class ArticuloAdapter extends RecyclerView.Adapter<ArticuloAdapter.Articu
             tvPrecio = itemView.findViewById(R.id.tvItemPrecio);
             tvEstado = itemView.findViewById(R.id.tvItemEstado);
             cvContenedor = itemView.findViewById(R.id.cvContenedor);
+            tvOferta = itemView.findViewById(R.id.tvOferta);
         }
     }
 }

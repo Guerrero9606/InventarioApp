@@ -78,5 +78,17 @@
             android:background="#4CAF50"
             android:padding="4dp"
             />
+
+        <TextView
+            android:id="@+id/tvOferta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Oferta"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="#4CAF50"
+            android:padding="4dp"
+            />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
