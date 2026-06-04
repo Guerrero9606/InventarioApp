@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cvContenedor"
@@ -7,88 +6,94 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="6dp"
+    app:cardElevation="4dp"
     app:cardBackgroundColor="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_horizontal" >
-
-        <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_carrito"
-            app:tint="@color/colorPrimary"
-            android:layout_marginEnd="16dp"
-            />
-
-        <TextView
-            android:id="@+id/tvItemCodigo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@color/colorPrimary"
-            android:textColor="@android:color/white"
-            android:text="101"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:layout_marginEnd="16dp"
-            android:backgroundTint="@color/colorPrimary"
-            />
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:gravity="center_horizontal">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
 
             <TextView
-                android:id="@+id/tvItemDescripcion"
-                android:layout_width="match_parent"
+                android:id="@+id/tvItemCodigo"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Nombre del Articulo"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#212121"
-                />
+                android:text="#101"
+                android:textSize="12sp"
+                android:textColor="#757575"
+                android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvItemPrecio"
+                android:id="@+id/tvOferta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$0.0"
-                android:textColor="#388E3C"
-                android:textSize="16sp"
-                android:layout_marginTop="4dp"
-                />
+                android:text="OFERTA"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="#FF9800"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:layout_marginEnd="4dp" />
 
+            <TextView
+                android:id="@+id/tvItemEstado"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ACTIVO"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="#4CAF50"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvItemEstado"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="DISPONIBLE"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="#4CAF50"
-            android:padding="4dp"
-            />
+        <ImageView
+            android:id="@+id/ivProducto"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_carrito"
+            app:tint="@color/colorPrimary"
+            android:layout_marginBottom="12dp" />
 
         <TextView
-            android:id="@+id/tvOferta"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvItemDescripcion"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Oferta"
-            android:textSize="12sp"
+            android:text="Nombre del Artículo"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="#4CAF50"
-            android:padding="4dp"
-            />
+            android:textColor="#212121"
+            android:gravity="center"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tvItemPrecio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="$0.0"
+            android:textColor="#388E3C"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="8dp" />
+
     </LinearLayout>
+
 </androidx.cardview.widget.CardView>

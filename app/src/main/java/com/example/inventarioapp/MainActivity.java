@@ -2,21 +2,22 @@ package com.example.inventarioapp;
 
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.Button;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
-import androidx.recyclerview.widget.LinearLayoutManager;
+
+import androidx.recyclerview.widget.GridLayoutManager;
+//import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -24,7 +25,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private EditText etCodigo, etDescripcion, etPrecio;
+
+    private TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
+    private TextInputEditText etCodigo, etDescripcion, etPrecio;
     private Button btnRegistrar, btnBorrar, btnEditar, btnBuscar, btnVerTodos;
 
     private RecyclerView rvArticulos;
@@ -34,10 +37,16 @@ public class MainActivity extends AppCompatActivity {
     private android.widget.ProgressBar pbCarga;
     private com.google.android.material.switchmaterial.SwitchMaterial swOferta;
 
+    private com.google.firebase.firestore.ListenerRegistration listenerFirestore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        tilCodigo = findViewById(R.id.tilCodigo);
+        tilDescripcion = findViewById(R.id.tilDescripcion);
+        tilPrecio = findViewById(R.id.tilPrecio);
 
         etCodigo = findViewById(R.id.etCodigo);
         etDescripcion = findViewById(R.id.etDescripcion);
@@ -55,9 +64,27 @@ public class MainActivity extends AppCompatActivity {
         btnVerTodos = findViewById(R.id.btnVerTodos);
         db = FirebaseFirestore.getInstance();
 
-        btnRegistrar.setOnClickListener(new View.OnClickListener() {
+        etPrecio.addTextChangedListener(new android.text.TextWatcher() {
             @Override
-            public void onClick(View v) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.toString().isEmpty()) {
+                    tilPrecio.setError("El precio no puede estar vacío");
+                } else if (Double.parseDouble(s.toString()) <= 0) {
+                    tilPrecio.setError("El precio debe ser mayor a cero");
+                } else {
+                    tilPrecio.setErrorEnabled(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) { }
+        });
+
+        btnRegistrar.setOnClickListener(v -> {
+            if (esFormularioValido()){
                 registrarArticuloFirebase();
             }
         });
@@ -88,12 +115,42 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) { filtrarSoloOfertas(); }
         });
 
-        rvArticulos.setLayoutManager(new LinearLayoutManager(this));
+        rvArticulos.setLayoutManager(new GridLayoutManager(this, 2));
 
         cargarDatosEnTiempoReal();
 
     }
 
+    private boolean esFormularioValido(){
+        boolean esValido = true;
+
+        String codigo = etCodigo.getText().toString();
+        String descripcion = etDescripcion.getText().toString();
+        String precio = etPrecio.getText().toString();
+
+        if (codigo.isEmpty() || codigo.length() < 3){
+            tilCodigo.setError("El codigo debe tener al menos 3 digitos");
+            esValido = false;
+        } else {
+            tilCodigo.setErrorEnabled(false);
+        }
+
+        if (descripcion.isEmpty() || descripcion.length() < 5 ) {
+            tilDescripcion.setError("Sea mas descriptivo con el articulo");
+            esValido = false;
+        } else {
+            tilDescripcion.setErrorEnabled(false);
+        }
+
+        if (precio.isEmpty()) {
+            tilPrecio.setError("El campo no puede estar vacio");
+            esValido = false;
+        } else {
+            tilPrecio.setErrorEnabled(false);
+        }
+
+        return esValido;
+    }
     private void registrarArticulo(){
         String codigo = etCodigo.getText().toString();
         String descripcion = etDescripcion.getText().toString();
@@ -348,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
         adaptador = new ArticuloAdapter(listaArticulos);
         rvArticulos.setAdapter(adaptador);
 
-        db.collection("articulos")
+        listenerFirestore = db.collection("articulos")
                 .addSnapshotListener( (value, error) -> {
                     if(error != null){
                         Toast.makeText(this, "Fallo al escuchar los cambios", Toast.LENGTH_SHORT).show();
@@ -365,6 +422,14 @@ public class MainActivity extends AppCompatActivity {
                         adaptador.notifyDataSetChanged();
                     }
                 } );
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        if(listenerFirestore != null) {
+            listenerFirestore.remove();
+        }
     }
 
     private void registrarArticuloFirebase(){
