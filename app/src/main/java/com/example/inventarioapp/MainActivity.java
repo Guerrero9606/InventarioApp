@@ -1,5 +1,6 @@
 package com.example.inventarioapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
     private TextInputEditText etCodigo, etDescripcion, etPrecio;
-    private Button btnRegistrar, btnBorrar, btnEditar, btnBuscar, btnVerTodos;
+    private Button btnRegistrar, btnBorrar, btnEditar, btnBuscar, btnVerTodos, btnCerrarSesion;
 
     private RecyclerView rvArticulos;
     private ArticuloAdapter adaptador;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         btnBuscar = findViewById(R.id.btnBuscar);
         btnEditar = findViewById(R.id.btnEditar);
         btnBorrar = findViewById(R.id.btnBorrar);
+        btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
 
         pbCarga = findViewById(R.id.pbCarga);
         swOferta = findViewById(R.id.swOferta);
@@ -113,6 +115,13 @@ public class MainActivity extends AppCompatActivity {
         btnVerTodos.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) { filtrarSoloOfertas(); }
+        });
+
+        btnCerrarSesion.setOnClickListener(v -> {
+            Intent intencion = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intencion);
+
+            finish();
         });
 
         rvArticulos.setLayoutManager(new GridLayoutManager(this, 2));

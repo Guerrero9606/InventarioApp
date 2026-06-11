@@ -182,4 +182,13 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCerrarSesion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="CERRAR SESION"
+        app:backgroundTint="#FF0000"
+        android:padding="16dp"
+        android:textStyle="bold"/>
+
 </LinearLayout>
