@@ -19,6 +19,7 @@ import java.util.List;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private com.google.android.material.switchmaterial.SwitchMaterial swOferta;
 
     private com.google.firebase.firestore.ListenerRegistration listenerFirestore;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -65,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
         swOferta = findViewById(R.id.swOferta);
         btnVerTodos = findViewById(R.id.btnVerTodos);
         db = FirebaseFirestore.getInstance();
+
+        mAuth = FirebaseAuth.getInstance();
 
         etPrecio.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -118,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnCerrarSesion.setOnClickListener(v -> {
+            mAuth.signOut();
+
             Intent intencion = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intencion);
 
