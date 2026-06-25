@@ -134,6 +134,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnCerrarSesion.setOnClickListener(v -> {
+
+            SharedPreferences preferenciasLogout = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferenciasLogout.edit();
+            editor.clear();
+            editor.apply();
+
             mAuth.signOut();
 
             Intent intencion = new Intent(MainActivity.this, LoginActivity.class);
@@ -159,8 +165,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Ingrese un nombre", Toast.LENGTH_SHORT).show();
             }
         });
-
-
 
         rvArticulos.setLayoutManager(new GridLayoutManager(this, 2));
 
