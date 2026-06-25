@@ -176,6 +176,35 @@
         android:textColor="#212121"
         android:layout_marginBottom="8dp" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="#E3F2FD"
+        android:padding="8dp">
+
+        <EditText
+            android:id="@+id/etNombreTienda"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Nombre de tu Tienda"
+            android:inputType="textCapWords"
+            android:textSize="14sp"
+            android:background="@android:color/transparent"
+            android:padding="8dp"
+            />
+
+        <Button
+            android:id="@+id/btnGuardarTienda"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Guardar"
+            android:textSize="12sp"/>
+
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvArticulos"
         android:layout_width="match_parent"

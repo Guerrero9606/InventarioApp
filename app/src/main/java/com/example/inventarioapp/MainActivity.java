@@ -2,20 +2,23 @@ package com.example.inventarioapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.Button;
 import android.database.sqlite.SQLiteDatabase;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 //import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -23,14 +26,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class MainActivity extends AppCompatActivity {
 
     private TextInputLayout tilCodigo, tilDescripcion, tilPrecio;
     private TextInputEditText etCodigo, etDescripcion, etPrecio;
-    private Button btnRegistrar, btnBorrar, btnEditar, btnBuscar, btnVerTodos, btnCerrarSesion;
+    private Button btnRegistrar, btnBorrar, btnEditar, btnBuscar, btnVerTodos, btnCerrarSesion, btnGuardarTienda;
 
     private RecyclerView rvArticulos;
     private ArticuloAdapter adaptador;
@@ -38,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private android.widget.ProgressBar pbCarga;
     private com.google.android.material.switchmaterial.SwitchMaterial swOferta;
-
     private com.google.firebase.firestore.ListenerRegistration listenerFirestore;
+    private EditText etNombreTienda;
     private FirebaseAuth mAuth;
 
     @Override
@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         etCodigo = findViewById(R.id.etCodigo);
         etDescripcion = findViewById(R.id.etDescripcion);
         etPrecio = findViewById(R.id.etPrecio);
+        etNombreTienda = findViewById(R.id.etNombreTienda);
 
         rvArticulos = findViewById(R.id.rvArticulos);
 
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         btnEditar = findViewById(R.id.btnEditar);
         btnBorrar = findViewById(R.id.btnBorrar);
         btnCerrarSesion = findViewById(R.id.btnCerrarSesion);
+        btnGuardarTienda = findViewById(R.id.btnGuardarTienda);
 
         pbCarga = findViewById(R.id.pbCarga);
         swOferta = findViewById(R.id.swOferta);
@@ -69,6 +71,16 @@ public class MainActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         mAuth = FirebaseAuth.getInstance();
+
+        SharedPreferences preferencias = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+
+        String tiendaGuardada = preferencias.getString("nombre_tienda", "Mi inventario");
+
+        etNombreTienda.setText(tiendaGuardada);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Inventario: " + tiendaGuardada);
+        }
 
         etPrecio.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -129,6 +141,26 @@ public class MainActivity extends AppCompatActivity {
 
             finish();
         });
+
+        btnGuardarTienda.setOnClickListener(v -> {
+            String nombreTienda = etNombreTienda.getText().toString().trim();
+
+            if (!nombreTienda.isEmpty()) {
+                SharedPreferences preferences = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+
+                SharedPreferences.Editor editor = preferences.edit();
+
+                editor.putString("nombre_tienda", nombreTienda);
+
+                editor.apply(); //.commit() bloquea toda la app
+
+                Toast.makeText(MainActivity.this, "Nombre guardado correctamente en el dispositivo", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "Ingrese un nombre", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
 
         rvArticulos.setLayoutManager(new GridLayoutManager(this, 2));
 
