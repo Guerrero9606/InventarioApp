@@ -72,14 +72,15 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        SharedPreferences preferencias = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
+        SharedPreferences preferencias = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
 
-        String tiendaGuardada = preferencias.getString("nombre_tienda", "Mi inventario");
+        String nombreCached = preferencias.getString("nombre", "Usuario");
+        String rolCached = preferencias.getString("rol", "Vendedor");
 
-        etNombreTienda.setText(tiendaGuardada);
+        //etNombreTienda.setText(tiendaGuardada);
 
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Inventario: " + tiendaGuardada);
+            getSupportActionBar().setTitle("Hola, " + nombreCached + " (" + rolCached + ") ");
         }
 
         etPrecio.addTextChangedListener(new android.text.TextWatcher() {
@@ -135,10 +136,12 @@ public class MainActivity extends AppCompatActivity {
 
         btnCerrarSesion.setOnClickListener(v -> {
 
-            SharedPreferences preferenciasLogout = getSharedPreferences("ConfiguracionApp", MODE_PRIVATE);
-            SharedPreferences.Editor editor = preferenciasLogout.edit();
-            editor.clear();
-            editor.apply();
+            SharedPreferences prefs = getSharedPreferences("SesionUsuario", MODE_PRIVATE);
+            prefs.edit().clear().apply();
+
+            //SharedPreferences.Editor editor = preferenciasLogout.edit();
+            //editor.clear();
+            //editor.apply();
 
             mAuth.signOut();
 

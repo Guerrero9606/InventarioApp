@@ -9,14 +9,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.Firebase;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegistroActivity extends AppCompatActivity {
 
     private TextView tvVolverLogin;
     private Button btnRegistrarUsuario;
 
-    private com.google.android.material.textfield.TextInputEditText etRegistrarCorreo, etRegistrarPassword, etRegistrarPasswordConf;
-
+    private com.google.android.material.textfield.TextInputEditText etRegistrarNombre, etRegistrarCorreo, etRegistrarPassword, etRegistrarPasswordConf;
+    private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
     @Override
@@ -26,11 +30,13 @@ public class RegistroActivity extends AppCompatActivity {
 
         tvVolverLogin = findViewById(R.id.tvVolverLogin);
         btnRegistrarUsuario = findViewById(R.id.btnRegistrarUsuario);
+        etRegistrarNombre = findViewById(R.id.etRegistrarNombre);
         etRegistrarCorreo = findViewById(R.id.etRegistrarCorreo);
         etRegistrarPassword = findViewById(R.id.etRegistrarPassword);
         etRegistrarPasswordConf = findViewById(R.id.etRegistrarPasswordConf);
 
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         tvVolverLogin.setOnClickListener(v -> {
             finish();
@@ -40,11 +46,13 @@ public class RegistroActivity extends AppCompatActivity {
     }
 
     private void crearCuentaFirebase(){
+        String nombre = etRegistrarNombre.getText().toString().trim();
         String correo = etRegistrarCorreo.getText().toString().trim();
         String password = etRegistrarPassword.getText().toString().trim();
         String confirmacion = etRegistrarPasswordConf.getText().toString().trim();
 
-        if (correo.isEmpty() || password.isEmpty() || confirmacion.isEmpty()){
+        //&& AND, || OR
+        if (nombre.isEmpty() || correo.isEmpty() || password.isEmpty() || confirmacion.isEmpty()){
             Toast.makeText(this, "Por favor llena todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -68,8 +76,18 @@ public class RegistroActivity extends AppCompatActivity {
                     btnRegistrarUsuario.setText("REGISTRARME");
 
                     if (task.isSuccessful()) {
-                        Toast.makeText(RegistroActivity.this, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show();
-                        finish();
+                        String uidUsuario = mAuth.getCurrentUser().getUid();
+
+                        Map<String, Object> perfilUsuario = new HashMap<>();
+                        perfilUsuario.put("nombre", nombre);
+                        perfilUsuario.put("correo", correo);
+                        perfilUsuario.put("rol", "Administrador");
+
+                        db.collection("usuario").document(uidUsuario).set(perfilUsuario)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Toast.makeText(RegistroActivity.this, "Cuenta creada exitosamente", Toast.LENGTH_SHORT).show();
+                                            finish();
+                                        });
                     } else {
                         Toast.makeText(RegistroActivity.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
